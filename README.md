@@ -1,6 +1,7 @@
 # Hanvas
 
 Hanvas is a browser-based hand-tracking paint app. It uses webcam input and MediaPipe hand landmarks to let you draw in the air, choose colors, clear strokes, and export the canvas as PNG.
+It supports multiple simultaneous hands, with independent stroke trails for each detected hand.
 
 ## How It Works
 

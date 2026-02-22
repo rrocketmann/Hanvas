@@ -31,8 +31,7 @@ let exportButton;
 let colorSelect;
 let webcamRunning = false;
 let stream = null;
-let midpointTrail = [];
-let lastMidpointSample = null;
+let midpointTrails = {};
 
 const DEFAULT_PAINT_COLOR = "#6fa8e6";
 const CONNECTOR_COLOR = "#9cc2ee";
@@ -119,17 +118,24 @@ function drawMidpoint(midpoint) {
 }
 
 function drawMidpointTrail() {
-  for (const point of midpointTrail) {
-    drawMidpoint(point);
+  for (const trail of Object.values(midpointTrails)) {
+    for (const point of trail) {
+      drawMidpoint(point);
+    }
   }
 }
 
-function addMidpointToTrail(midpoint) {
+function addMidpointToTrail(midpoint, handKey) {
   if (!midpoint) {
     return;
   }
 
-  const now = performance.now();
+  const key = handKey || "Hand";
+  if (!midpointTrails[key]) {
+    midpointTrails[key] = [];
+  }
+
+  const handTrail = midpointTrails[key];
   const radiusX = 10;
   const radiusY = 10;
   
@@ -141,13 +147,9 @@ function addMidpointToTrail(midpoint) {
     color: currentPaintColor
   };
 
-  const lastPoint = midpointTrail[midpointTrail.length - 1];
+  const lastPoint = handTrail[handTrail.length - 1];
   if (!lastPoint) {
-    midpointTrail.push(midpointPoint);
-    lastMidpointSample = {
-      point: midpoint,
-      timeMs: now
-    };
+    handTrail.push(midpointPoint);
     return;
   }
 
@@ -164,7 +166,7 @@ function addMidpointToTrail(midpoint) {
       const interpolationSteps = Math.floor(distancePx / maxGapPx);
       for (let step = 1; step <= interpolationSteps; step += 1) {
         const t = step / (interpolationSteps + 1);
-        midpointTrail.push({
+        handTrail.push({
           x: lastPoint.x + (midpointPoint.x - lastPoint.x) * t,
           y: lastPoint.y + (midpointPoint.y - lastPoint.y) * t,
           z: lastPoint.z + (midpointPoint.z - lastPoint.z) * t,
@@ -175,11 +177,7 @@ function addMidpointToTrail(midpoint) {
       }
     }
 
-    midpointTrail.push(midpointPoint);
-    lastMidpointSample = {
-      point: midpoint,
-      timeMs: now
-    };
+    handTrail.push(midpointPoint);
   }
 }
 
@@ -191,8 +189,7 @@ function setPaintColor(event) {
 }
 
 function clearMidpointTrail() {
-  midpointTrail = [];
-  lastMidpointSample = null;
+  midpointTrails = {};
 }
 
 function exportDrawing() {
@@ -226,7 +223,7 @@ function exportDrawing() {
 
 function setHandState(text) {
   if (handStateElement) {
-    handStateElement.textContent = `Hand state: ${text}`;
+    handStateElement.textContent = `Hand states: ${text}`;
   }
 }
 
@@ -402,17 +399,20 @@ async function predictWebcam() {
   }
   canvasCtx.save();
   canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
-  if (results?.landmarks) {
-    const primaryHand = results.landmarks[0];
-    let midpoint = null;
-    if (primaryHand) {
-      const handState = inferHandState(primaryHand);
-      setHandState(handState);
+  if (results?.landmarks?.length) {
+    const handStateLabels = [];
+    results.landmarks.forEach((landmarks, index) => {
+      const handLabel = results?.handednesses?.[index]?.[0]?.categoryName || `Hand ${index + 1}`;
+      const handState = inferHandState(landmarks);
+      handStateLabels.push(`${handLabel}: ${handState}`);
+
       if (handState === "Fist" || handState === "Partial hand") {
-        midpoint = getLandmarksMidpoint(primaryHand);
-        addMidpointToTrail(midpoint);
+        const midpoint = getLandmarksMidpoint(landmarks);
+        addMidpointToTrail(midpoint, handLabel);
       }
-    }
+    });
+
+    setHandState(handStateLabels.join(" | "));
     drawMidpointTrail();
     for (const landmarks of results.landmarks) {
       drawConnectors(canvasCtx, landmarks, HAND_CONNECTIONS, {
