@@ -19,7 +19,7 @@ limitations under the License. -->
   <title>Hanvas</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Roboto+Condensed:wght@400;500;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="style.css" />
   <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js" crossorigin="anonymous"></script>
   <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
@@ -28,32 +28,9 @@ limitations under the License. -->
 <body>
   <section id="demos">
   <h1 id="appTitle">Hanvas</h1>
-  <section id="aboutPanel" aria-label="About Hanvas">
-    <h2>About Hanvas</h2>
-    <p>
-      Hanvas is a real-time browser drawing app powered by MediaPipe hand landmark tracking.
-      The webcam stream is analyzed frame-by-frame, and a 21-point hand skeleton is estimated
-      in normalized coordinates, then mapped to the drawing canvas.
-    </p>
-    <p>
-      Drawing behavior is gesture-gated: closed or partially closed hands create paint points,
-      and nearby sampled points are interpolated to reduce visible gaps and produce smoother
-      strokes. Paint color is selected in the toolbar and stored per-point so mixed-color
-      drawings keep their original segments.
-    </p>
-    <p>
-      Libraries used: MediaPipe Tasks Vision (`HandLandmarker`, `FilesetResolver`) for detection,
-      plus MediaPipe drawing utilities for landmark rendering overlays.
-    </p>
-    <p>
-      Export captures the active drawing canvas as PNG. Project source is MIT licensed; bundled
-      MediaPipe components are provided under Apache License 2.0.
-    </p>
-  </section>
 
     <div id="liveView">
       <div class="controls">
-        <button id="webcamButton">ENABLE WEBCAM</button>
         <button id="clearButton">CLEAR DRAWING</button>
         <button id="exportButton">EXPORT</button>
         <select id="colorSelect" aria-label="Paint color">
@@ -66,9 +43,11 @@ limitations under the License. -->
       </div>
       <div id="mediaRow">
         <div id="drawingArea">
+          <span class="mediaLabel">CANVAS</span>
           <canvas id="output_canvas"></canvas>
         </div>
-        <div>
+        <div id="webcamArea">
+          <span class="mediaLabel">WEBCAM</span>
           <video id="webcam" autoplay playsinline></video>
         </div>
       </div>

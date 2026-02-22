@@ -7,14 +7,25 @@
 }
 
 body {
-  font-family: "Roboto", Arial, sans-serif;
+  font-family: "JetBrains Mono", "Courier New", monospace;
   background-color: var(--blue-bg);
   color: var(--blue-text);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  margin: 0;
+}
+
+#demos {
+  max-width: 1400px;
+  width: 100%;
+  padding: 20px;
 }
 
 #appTitle {
   margin: 0 0 12px 0;
-  font-size: 30px;
+  font-size: 48px;
   color: #3f5878;
   text-align: center;
 }
@@ -31,90 +42,88 @@ body {
   gap: 6px;
   padding: 10px 12px;
   border: 1px solid var(--blue-border);
-  border-radius: 8px;
   background-color: #e9f2ff;
+  font-family: "Roboto Condensed", "Arial Narrow", sans-serif-condensed;
+  font-size: 13px;
 }
 
 #techOutputs p {
   margin: 0;
 }
 
-#techOutputs {
-  font-family: "JetBrains Mono", "Courier New", monospace;
-  font-size: 13px;
-}
-
-#aboutPanel {
-  margin-bottom: 12px;
-  border: 1px solid var(--blue-border);
-  border-radius: 8px;
-  padding: 12px;
-  background-color: #e9f2ff;
-}
-
-#aboutPanel h2 {
-  margin: 0 0 8px 0;
-  font-size: 18px;
-  color: #3f5878;
-}
-
-#aboutPanel p {
-  margin: 0 0 8px 0;
-  line-height: 1.45;
-}
-
-#aboutPanel p:last-child {
-  margin-bottom: 0;
-}
-
 #mediaRow {
   display: flex;
+  flex-direction: column;
   align-items: flex-start;
-  justify-content: space-evenly;
+  gap: 12px;
   width: 100%;
+}
+
+#drawingArea,
+#webcamArea {
+  position: relative;
+  width: 100%;
+  max-width: 640px;
+  aspect-ratio: 1;
+}
+
+.mediaLabel {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  z-index: 10;
+  padding: 4px 8px;
+  background-color: rgba(255, 255, 255, 0.9);
+  color: #3f5878;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
 }
 
 .controls {
   display: flex;
   gap: 12px;
   flex-wrap: wrap;
+  justify-content: flex-start;
 }
 
-.controls button {
+.controls button,
+.controls select {
   padding: 10px 16px;
   font-size: 14px;
   cursor: pointer;
   border: 1px solid var(--blue-border);
   background-color: var(--blue-button);
   color: #3f5878;
-  border-radius: 6px;
-}
-
-.controls select {
-  padding: 10px 12px;
-  font-size: 14px;
-  border: 1px solid var(--blue-border);
-  background-color: var(--blue-button);
-  color: #3f5878;
-  border-radius: 6px;
 }
 
 .controls button:hover {
   background-color: var(--blue-button-hover);
 }
 
-#drawingArea {
-  display: inline-block;
-}
-
 #webcam,
 #output_canvas {
   display: block;
-  border-radius: 8px;
   border: 2px solid transparent;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 #mediaRow.media-active #webcam,
 #mediaRow.media-active #output_canvas {
   border-color: var(--blue-border);
+}
+
+/* Responsive: side by side on larger screens */
+@media (min-width: 1024px) {
+  #mediaRow {
+    flex-direction: row;
+    justify-content: center;
+  }
+  
+  #drawingArea,
+  #webcamArea {
+    width: calc(50% - 6px);
+  }
 }

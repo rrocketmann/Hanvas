@@ -255,10 +255,12 @@ const createHandLandmarker = async () => {
         numHands: 2
       });
     }
-    setStatus("Hand model ready. Click ENABLE WEBCAM.");
+    setStatus("Hand model ready. Starting webcam...");
+    autoEnableCam();
   } catch {
-    setStatus("Hand model failed to load. Webcam can still open, but landmarks will not draw.");
+    setStatus("Hand model failed to load. Starting webcam...");
     console.error("Failed to initialize HandLandmarker.");
+    autoEnableCam();
   }
   demosSection.classList.remove("invisible");
 };
@@ -286,21 +288,9 @@ function setMediaActive(active) {
 
 setMediaActive(false);
 
-// Check if webcam access is supported.
-const hasGetUserMedia = () => !!navigator.mediaDevices?.getUserMedia;
-
-// If webcam supported, add event listener to button for when user
-// wants to activate it.
-if (hasGetUserMedia()) {
-  enableWebcamButton = document.getElementById("webcamButton");
-  if (enableWebcamButton) {
-    enableWebcamButton.addEventListener("click", enableCam);
-  } else {
-    setStatus("Webcam button not found in page.");
-  }
-} else {
-  setStatus("getUserMedia is not supported by this browser.");
-  console.warn("getUserMedia() is not supported by your browser");
+// Auto-enable webcam at launch
+function autoEnableCam() {
+  enableCam();
 }
 
 clearButton = document.getElementById("clearButton");
@@ -334,22 +324,9 @@ function enableCam(event) {
   }
 
   if (webcamRunning === true) {
-    webcamRunning = false;
-    if (stream) {
-      for (const track of stream.getTracks()) {
-        track.stop();
-      }
-      stream = null;
-    }
-    video.srcObject = null;
-    setWebcamButtonLabel("ENABLE WEBCAM");
-    setStatus("Webcam stopped.");
-    setHandState("No hand detected");
-    setMediaActive(false);
-    clearMidpointTrail();
+    return;
   } else {
     webcamRunning = true;
-    setWebcamButtonLabel("DISABLE WEBCAM");
     setStatus("Requesting webcam permission...");
 
     // getUsermedia parameters.
@@ -372,7 +349,6 @@ function enableCam(event) {
     }).catch((error) => {
       webcamRunning = false;
       setMediaActive(false);
-      setWebcamButtonLabel("ENABLE WEBCAM");
       setStatus(`Unable to access webcam: ${error.name}. Check browser camera permissions.`);
       console.error("Unable to access webcam:", error);
     });
@@ -402,7 +378,9 @@ async function predictWebcam() {
   if (results?.landmarks?.length) {
     const handStateLabels = [];
     results.landmarks.forEach((landmarks, index) => {
-      const handLabel = results?.handednesses?.[index]?.[0]?.categoryName || `Hand ${index + 1}`;
+      const detectedHand = results?.handednesses?.[index]?.[0]?.categoryName || `Hand ${index + 1}`;
+      // Mirror the hand label since video is flipped
+      const handLabel = detectedHand === "Left" ? "Right" : detectedHand === "Right" ? "Left" : detectedHand;
       const handState = inferHandState(landmarks);
       handStateLabels.push(`${handLabel}: ${handState}`);
 
